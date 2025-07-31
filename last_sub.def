@@ -1,0 +1,44 @@
+Bootstrap: docker
+From: nvcr.io/nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
+Stage: build
+%setup
+%files
+%environment
+%post
+export DEBIAN_FRONTEND=noninteractive
+apt update
+apt install -y software-properties-common
+apt -y install git htop vim tmux wget
+apt install -y graphviz ffmpeg
+apt install -y python3
+apt install -y python3-pip
+apt install -y python-is-python3
+pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu124
+pip install genesis-world
+# pip install genesis-world==0.3.5
+mkdir /Downloads
+cd /Downloads
+wget https://github.com/ompl/ompl/releases/download/prerelease/ompl-1.8.0-cp310-cp310-manylinux_2_28_x86_64.whl
+pip install ompl-1.8.0-cp310-cp310-manylinux_2_28_x86_64.whl
+mkdir /gitrepo
+cd /gitrepo
+git clone https://github.com/Genesis-Embodied-AI/Genesis.git
+git clone https://github.com/leggedrobotics/rsl_rl
+# cd`s rsl_rl && git checkout v2.2.4 && pip install -e .
+cd rsl_rl
+git fetch --tags          # ★ タグ一覧を取得
+git checkout v2.2.4
+pip install --user -e .
+pip install tensorboard
+chmod 777 /gitrepo -R
+pip uninstall -y libigl
+pip install libigl==2.5.1
+pip uninstall -y rsl_rl rsl-rl-lib
+pip install rsl-rl-lib==2.2.4
+pip install py-cpuinfo
+pip install keyboard
+%runscript
+%startscript
+%test
+%labels
+%help
